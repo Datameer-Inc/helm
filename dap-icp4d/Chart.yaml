@@ -1,0 +1,17 @@
+name: dap-icp4d
+version: 1.0.0
+appVersion: 2019.01.16
+description: Datameer provides agile self-service data preparation and exploration
+keywords:
+- etl
+- big
+- data
+- prep
+- hadoop
+- spark
+home: http://www.datameer.com
+sources:
+- https://github.com/Datameer
+maintainers:
+- name: Datameer
+  email: jellyfish@datameer.com

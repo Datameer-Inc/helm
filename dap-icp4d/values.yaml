@@ -1,0 +1,50 @@
+# Default values for DAP deployment in ICP4D (IBM Cloud Private For Data)
+# This is a YAML-formatted file.
+
+# image contains the Docker image settings
+image:
+  repository: mycluster.icp:8500/zen/datameer/dap-7.2.7-hdp-2.6.5
+  tag: 2019.01.16-icp4d
+  pullPolicy: IfNotPresent
+
+# livenessProbeInitialDelaySeconds controls how much time k8s waits before
+# triggering the liveness probe.
+livenessProbeInitialDelaySeconds: 180
+
+# readinessProbeInitialDelaySeconds controls how much time k8s waits before
+# triggering the readiness probe.
+readinessProbeInitialDelaySeconds: 180
+
+resources: {}
+  # If you do want to specify resources, uncomment the following lines, adjust
+  # them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Settings for mariaDB subchart
+mariadb:
+  replication:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+  slave:
+    persistence:
+      enabled: false
+  db:
+    # Create a default database but leave the 'dap' one to the DAP SQL scripts
+    # We do not create the dap user either as this is included in the mySQL init
+    # script GRANT clause.
+    name: "datameer_unused_db"
+  rootUser:
+    password: "rootPasswd"
