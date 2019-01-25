@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "datameer.fullname" . }}
+  labels:
+    app: {{ template "datameer.name" . }}
+    chart: {{ template "datameer.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "datameer.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "datameer.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+              # Important: we rely on the fact that the mariaDB subchart uses
+              # the mariadb.fullname named template to define the name of its
+              # associated service and secret (cf mariadb.fullname template
+              # function within _helpers.tpl). Unfortunately, although the named
+              # template is in scope to be called, it internally uses the
+              # .Chart.Name value, which gets resolved to 'dap' instead of
+              # 'mariadb' when present here. For that reason, we duplicate part
+              # of the mariadb.fullname code here instead.
+              # Using the environment variables allows the DAP Docker container
+              # to find the mariaDB one whatever the chart release name is and
+              # to pick up the root password for the DB as defined in
+              # values.yaml
+            - name: DAP_ENV_MARIADB_HOSTNAME
+              value: "{{ .Release.Name }}-mariadb"
+            - name: DAP_ENV_MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-mariadb"
+                  key: mariadb-root-password
+            - name: DAP_ENV_DEPLOY_MODE
+              value: "live"
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbeInitialDelaySeconds }}
+            httpGet:
+              # DAP returns HTTP 302 on / so we use the actual URL to always get
+              # HTTP 200. This allows certain k8s health checks to work
+              # natively (they inherit readiness/liveness probe settings)
+              path: /login
+              port: 8443
+              scheme: HTTPS
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.readinessProbeInitialDelaySeconds }}
+            httpGet:
+              # DAP returns HTTP 302 on / so we use the actual URL to always get
+              # HTTP 200. This allows certain k8s health checks to work
+              # natively (they inherit readiness/liveness probe settings)
+              path: /login
+              port: 8443
+              scheme: HTTPS
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
