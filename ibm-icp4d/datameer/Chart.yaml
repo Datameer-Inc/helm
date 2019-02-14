@@ -1,6 +1,6 @@
-name: dap-icp4d
-version: 1.0.0
-appVersion: 2019.01.16
+name: datameer
+version: 1.0.1
+appVersion: 2019.02.14
 description: Datameer provides agile self-service data preparation and exploration
 keywords:
 - etl

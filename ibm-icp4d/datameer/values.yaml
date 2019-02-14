@@ -4,7 +4,7 @@
 # image contains the Docker image settings
 image:
   repository: mycluster.icp:8500/zen/datameer/dap-7.2.7-hdp-2.6.5
-  tag: 2019.01.16-icp4d
+  tag: 2019.02.14-icp4d
   pullPolicy: IfNotPresent
 
 # livenessProbeInitialDelaySeconds controls how much time k8s waits before
